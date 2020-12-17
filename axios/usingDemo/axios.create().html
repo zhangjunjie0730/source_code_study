@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>axios.create的使用</title>
+  </head>
+  <body>
+    <!-- 能够设置服务器响应的库：https://github.com/typicode/json-server -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      /*
+       * 为什么要设计axios.create(config)这个语法？
+       * 需求：项目中有部分接口需要的配置与另一部分接口需要的配置不太一样
+       * 解决：创建2个axios，每个都有自己特有的配置，分别引用到不同要求接口请求中去
+       */
+      const instance = axios.create({ baseURL: 'http://localhost:3000' });
+      // 使用instance发请求
+      instance.get({ url: '/posts' });
+    </script>
+  </body>
+</html>

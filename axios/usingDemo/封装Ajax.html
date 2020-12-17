@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>封装Ajax</title>
+  </head>
+  <body>
+    <script>
+      /**
+       * url: '', // 请求地址
+       * method: '', // 请求方式 GET/POST/PUT/DELETE
+       * params: {}, // GET/DELETE 请求的 query 参数
+       * data: {}, // POST 或 DELETE 请求的请求体参数
+       * 注意返回值是promise对象，来.then和.catch
+       */
+      function axios({ url, method = 'GET', params = {}, data = {} }) {
+        method = method || 'GET';
+        method = method.toUpperCase();
+        // 拼接params到url后面
+        let queryStr = '';
+        Object.keys(params).forEach(key => {
+          queryStr += `&${key}=${params[key]}`;
+        });
+        if (queryStr) {
+          // 把&name='zjj'变成name='zjj'
+          queryStr = queryStr.substring(1);
+          url += `?${queryStr}`;
+        }
+
+        // 返回一个promise对象
+        return new Promise((resolve, reject) => {
+          // 1.执行异步ajax请求
+          const request = new XMLHttpRequest();
+          // 传true才可以异步
+          request.open(method, url, true);
+          request.responseType = 'json';
+          // 先监听然后再发数据！
+          request.onreadystatechange = function () {
+            if (request.readyState !== 4) return;
+            const { status, statusText } = request;
+            if (status >= 200 && status < 300) {
+              const response = {
+                data: request.response,
+                status,
+                statusText,
+              };
+              resolve(response);
+            } else {
+              reject(new Error(`request error status is ${status}`));
+            }
+          };
+          if (method === 'GET' || method === 'DELETE') {
+            request.send();
+          } else {
+            // post和put请求要提交请求体参数
+            request.setRequestHeader('Content-Type', 'application/json;charset=-8');
+            // 发送请求
+            request.send(JSON.stringify(data));
+          }
+        });
+      }
+
+      function testGet() {
+        axios({ url: 'http://localhost:3000/post' })
+          .then(response => console.log('success', response.data, response))
+          .catch(error => alert(error.message));
+      }
+      function testPut() {
+        // 更新
+        axios({
+          url: 'http://localhost:3000/posts/1',
+          method: 'put',
+          data: { title: 'zjj', author: 'heheda' },
+        })
+          .then(response => console.log('put success', response))
+          .catch(error => alert(error.message));
+      }
+
+      function testPost() {
+        // 增加数据
+        axios({
+          url: 'http://localhost:3000/comments',
+          method: 'POST',
+          data: { body: 'aaaa', postId: 2 },
+        })
+          .then(response => {
+            console.log('post success', response.data, response);
+          })
+          .catch(error => {
+            alert(error.message);
+          });
+      }
+      testPost();
+    </script>
+  </body>
+</html>
